@@ -24,26 +24,32 @@ router.post('/signin',async (req,res)=>{
     const {email,password} = req.body;
     if(!email || !password)
     {
-        res.status(422).send({error:'Enter Password or Email'});
+       return res.status(422).send({error:'Enter Password or Email'});
     }
 
     const user = await User.findOne({email})
     if(!user)
     {
-        res.status(422).send({error:'Email ID Does not exits'});
+        return res.status(422).send({error:'Email ID Does not exits'});
     }
 
     try{
-       console.log("Just Test",password,email); 
        await user.comparePassword(password);
        const token = jwt.sign({userId:user._id},'MY_SECRET_KEY');
-       res.send({token});
+       if(token)
+       {
+           return res.send({token});
+       }
+       else
+       {
+            return res.status(444).send("Invalid TOken");
+       }
     }
     catch(err)
     {
         if(err)
         {
-            res.status(422).send({error:err.message});
+            return res.status(422).send({error:err.message});
         }
     }
 
